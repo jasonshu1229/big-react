@@ -1,0 +1,12 @@
+{
+  "name": "react-reconciler",
+  "version": "1.0.0",
+  "description": "React协调器",
+  "module": "index.js",
+  "dependencies": {
+    "shared": "workspace:*"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
