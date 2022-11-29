@@ -1,0 +1,8 @@
+{
+  "name": "shared",
+  "version": "1.0.0",
+  "description": "所有公用辅助方法及类型定义（与宿主环境无关）",
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
