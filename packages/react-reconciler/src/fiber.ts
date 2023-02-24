@@ -38,7 +38,7 @@ export class FiberNode {
 		this.type = null;
 
 		this.ref = null;
-		
+
 		// fiber 除了有自身实例上的属性，还需要有表示和其它节点的关系
 		// 作为树状结构
 		// 一个子级 fiberNode 指向 父级 FiberNode：表示子 fiberNode 工作结束后要 return 到父fiberNode工作
