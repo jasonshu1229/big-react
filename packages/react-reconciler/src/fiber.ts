@@ -1,6 +1,7 @@
 import { Props, Key, Ref } from 'shared/ReactTypes';
 import { WorkTag } from './workTags';
 import { Flags, NoFlags } from './fiberFlags';
+import { Container } from 'hostConfig';
 
 // ReactElement 对象的每个节点都会生成与之对应的 FiberNode
 // React针对不同的 ReactElement 对象会产生不同tag（种类）的 FiberNode
@@ -21,10 +22,12 @@ export class FiberNode {
 	index: number;
 
 	memoizedProps: Props | null;
-	// 双缓冲树的切换
-	alternate: FiberNode | null;
-	// fiberNode 双缓冲树对比之后产生的标记，比如插入，移动，删除等
-	flags: Flags;
+	memoizedState: any;
+
+	alternate: FiberNode | null; // 双缓冲树的切换
+	flags: Flags; // fiberNode 双缓冲树对比之后产生的标记，比如插入，移动，删除等
+
+	updateQueue: unknown;
 
 	// pendingProps 有哪些 props 需要改变
 	// key：对应的是 ReactElement 的 key
@@ -53,10 +56,58 @@ export class FiberNode {
 		// 作为工作单元
 		this.pendingProps = pendingProps; // 刚开始工作阶段的 props
 		this.memoizedProps = null; // 工作结束时确定下来的 props
-
-		// 用于 current Fiber树和 workInProgress Fiber树的切换（如果当时fiberNode树是current树，则alternate指向的是workInProgress树）
-		this.alternate = null;
-		// 副作用 比如插入 更改 删除dom等
-		this.flags = NoFlags; // 初始状态时表示没有任何标记（因为还没进行fiberNode对比）
+		this.memoizedState = null; // 更新完成后的新 state
+		this.updateQueue = null; // Fiber产生的更新操作都会放在更新队列中
+		this.alternate = null; // 用于 current Fiber树和 workInProgress Fiber树的切换（如果当时fiberNode树是current树，则alternate指向的是workInProgress树）
+		this.flags = NoFlags; // （副作用 比如插入 更改 删除dom等）初始状态时表示没有任何标记（因为还没进行fiberNode对比）
 	}
 }
+
+export class FiberRootNode {
+	container: Container; // 保存宿主环境挂载的节点(DomELement或者原生组件)
+	current: FiberNode; // 指向当前渲染的Fiber树的根节点，也就是 hostRootFiber
+	finishedWork: FiberNode | null; // 指向完成更新后的新的Fiber树的根节点
+	constructor(container: Container, hostRootFiber: FiberNode) {
+		this.container = container;
+		this.current = hostRootFiber;
+		hostRootFiber.stateNode = this;
+		this.finishedWork = null;
+	}
+}
+
+/**
+ * workInProgress Fiber表示渲染阶段正在处理的组件
+ * 该函数主要用来创建或复用一个workInProgress Fiber对象
+ * @param current 当前的Fiber对象
+ * @param pendingProps 新的属性对象
+ * @returns
+ */
+export const createWorkInProgress = (
+	current: FiberNode,
+	pendingProps: Props
+): FiberNode => {
+	let wip = current.alternate;
+
+	if (wip === null) {
+		// mount阶段
+		wip = new FiberNode(current.tag, pendingProps, current.key);
+		// 创建一个新的 Fiber对象（HostFiberNode，例如根元素 div），并复制current的属性和标记
+		wip.type = current.type;
+		wip.stateNode = current.stateNode;
+
+		wip.alternate = current;
+		current.alternate = wip;
+	} else {
+		// update阶段
+		// 复用，更新属性标记
+		wip.pendingProps = pendingProps;
+	}
+	// 清除副作用，可能是上一次更新遗留下来的
+	wip.flags = NoFlags;
+	wip.updateQueue = current.updateQueue;
+	wip.child = current.child;
+	wip.memoizedProps = current.memoizedProps;
+	wip.memoizedState = current.memoizedState;
+
+	return wip;
+};

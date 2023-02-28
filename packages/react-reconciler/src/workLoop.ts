@@ -1,18 +1,48 @@
 import { completeWork } from './completeWork';
 import { beginWork } from './beginWork';
-import { FiberNode } from './fiber';
+import { createWorkInProgress, FiberNode, FiberRootNode } from './fiber';
+import { HostRoot } from './workTags';
 
 // TODO：需要一个全局的指针，指向当时正在工作的 fiberNode 树，一般是 workInProgress
 // 指向当前工作单元的指针
 let workInProgress: FiberNode | null = null;
 
 // 用于进行初始化的操作
-function prepareFreshStack(fiber: FiberNode) {
+function prepareFreshStack(root: FiberRootNode) {
 	// 初始化将指针指向第一个fiberNode（root）
-	workInProgress = fiber;
+	workInProgress = createWorkInProgress(root.current, {});
 }
 
-// 主要用于进行 更新的过程，那么可以推测出调用 renderRoot 应该是触发更新的 api
+/*
+markUpdateFromFiberToRoot 函数的作用是将一个Fiber节点的更新标记打上，
+然后将这个标记一直向上遍历父节点，直到遍历到根节点，将根节点的更新标记也打上。
+这个函数通常在一个组件内部的Fiber树上的更新发生时被调用，用于标记哪些组件需要更新，
+然后将这些标记一直向上冒泡，最后标记整个应用需要更新。
+*/
+// 找到根节点，从根节点开始更新整个组件
+function markUpdateFromFiberToRoot(fiber: FiberNode) {
+	let node = fiber;
+	let parent = node.return;
+	while (parent !== null) {
+		node = parent;
+		parent = node.return;
+	}
+	if (node.tag === HostRoot) {
+		return node.stateNode; // 此时的 HostRootFiber 指向 FiberRootNode
+	}
+	// 可能是Portal节点，也可能是 Suspense节点
+	return null;
+}
+
+// 在fiber中更新调度
+export function scheduleUpdateOnFiber(fiber: FiberNode) {
+	// 调度功能 xxx
+	const root = markUpdateFromFiberToRoot(fiber);
+	renderRoot(root);
+}
+
+// 作用是用来创建fiber树，进而和更新流程联系起来
+// 那么可以推测出调用 renderRoot 应该是触发更新的 api
 function renderRoot(root: FiberNode) {
 	// 初始化
 	prepareFreshStack(root);

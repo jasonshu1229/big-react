@@ -17,5 +17,8 @@
     "noImplicitReturns": false,
     "skipLibCheck": true,
     "baseUrl": "./packages",
+    "paths": {
+      "hostConfig": ["./react-reconciler/src/hostConfig.ts"]
+    }
   }
 }
