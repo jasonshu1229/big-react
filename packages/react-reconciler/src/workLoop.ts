@@ -60,6 +60,15 @@ function renderRoot(root: FiberRootNode) {
 			workInProgress = null;
 		}
 	} while (true);
+
+	// 这个 finishedWork 已经是完成递归阶段两个函数生成的 workInProgress 树了
+	// 此时的 wip 已经包含了某些 Placement 副作用的标记了。
+	const finishedWork = root.current.alternate;
+	root.finishedWork = finishedWork;
+
+	// 根据 wip fiberNode树和树中的flags执行具体的Dom操作了。
+	// 接下来实行 react-dom下的首屏渲染流程了
+	cmmmitRoot(root);
 }
 
 // 该函数用于调度和执行 FiberNode 树的更新和渲染过程

@@ -27,6 +27,7 @@ export const beginWork = (wip: FiberNode) => {
 			}
 			break;
 	}
+	return null;
 };
 
 // 计算状态的最新值，并生成 子FiberNode（会和processUpdateQueue 消费状态函数联系）

@@ -25,6 +25,7 @@ export class FiberNode {
 	memoizedState: any;
 
 	alternate: FiberNode | null; // 双缓冲树的切换
+	subtreeFlags: Flags; // 子树中包含的flags
 	flags: Flags; // fiberNode 双缓冲树对比之后产生的标记，比如插入，移动，删除等
 
 	updateQueue: unknown;
@@ -59,7 +60,10 @@ export class FiberNode {
 		this.memoizedState = null; // 更新完成后的新 state
 		this.updateQueue = null; // Fiber产生的更新操作都会放在更新队列中
 		this.alternate = null; // 用于 current Fiber树和 workInProgress Fiber树的切换（如果当时fiberNode树是current树，则alternate指向的是workInProgress树）
-		this.flags = NoFlags; // （副作用 比如插入 更改 删除dom等）初始状态时表示没有任何标记（因为还没进行fiberNode对比）
+
+		// 副作用
+		this.flags = NoFlags; // （比如插入 更改 删除dom等）初始状态时表示没有任何标记（因为还没进行fiberNode对比）
+		this.subtreeFlags = NoFlags; // 子节点副作用标识
 	}
 }
 
@@ -101,10 +105,13 @@ export const createWorkInProgress = (
 		// update阶段
 		// 复用，更新属性标记
 		wip.pendingProps = pendingProps;
+		// 清除副作用，可能是上一次更新遗留下来的
+		wip.flags = NoFlags;
+		// 子树的副作用标识
+		wip.subtreeFlags = NoFlags;
 	}
-	// 清除副作用，可能是上一次更新遗留下来的
-	wip.flags = NoFlags;
 	// 把 current节点对应的 fiber tree 上的工作单元复制到 wip上
+	wip.type = current.type;
 	wip.updateQueue = current.updateQueue;
 	wip.child = current.child;
 	wip.memoizedProps = current.memoizedProps;

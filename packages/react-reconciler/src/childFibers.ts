@@ -44,6 +44,7 @@ function ChildReconciler(shouldTrackEffects: boolean) {
 		return fiber;
 	}
 
+	// 用来标记 fiberNode 的插入、删除、移动
 	return function reconcilerChildFibers(
 		returnFiber: FiberNode,
 		currentFiber: FiberNode | null,
