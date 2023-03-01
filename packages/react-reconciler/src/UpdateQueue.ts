@@ -27,24 +27,24 @@ export const createUpdate = <State>(action: Action<State>): Update<State> => {
 };
 
 // 定义一个创建 UpdateQueue 队列实例的方法
-export const createUpdateQueue = <Action>() => {
+export const createUpdateQueue = <State>() => {
 	return {
 		shared: {
 			pending: null
 		}
-	} as UpdateQueue<Action>;
+	} as UpdateQueue<State>;
 };
 
 // 往 UpdateQueue 里增加 Update 更新操作的任务
 // 将 Update 插入到 UpdateQueue
-export const enqueueUpdate = <Action>(
-	UpdateQueue: UpdateQueue<Action>,
-	Update: Update<Action>
+export const enqueueUpdate = <State>(
+	UpdateQueue: UpdateQueue<State>,
+	Update: Update<State>
 ) => {
 	UpdateQueue.shared.pending = Update;
 };
 
-// 定义一个 UpdateQueue 消费 Update实例的方法，也就是说需要执行状态更新操作任务
+// 定义一个 UpdateQueue 消费 Update实例的方法，遍历链表中的所有Update对象，并返回最新的state
 // 一个初始的状态，以及要消费的Update
 // 返回值是一个全新的状态
 export const processUpdateQueue = <State>(
