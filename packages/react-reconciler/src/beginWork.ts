@@ -1,6 +1,75 @@
+import { reconcilerChildFibers, mountChildFibers } from './childFibers';
+import { ReactElementType } from './../../shared/ReactTypes';
+import { processUpdateQueue, UpdateQueue } from './updateQueue';
+import { HostRoot, HostComponent, HostText } from './workTags';
 import { FiberNode } from './fiber';
+
 // 递归中的递阶段
 
-export const beginWork = (fiber: FiberNode) => {
-	//  将当前 FiberNode 和 ReactElement 比较，返回子FiberNode
+/**
+ * 作用：1.计算状态的最新值 2. 创建子 FiberNode
+ * @param wip 当前工作的 FiberNode 节点
+ * @returns 返回值是子FiberNode
+ */
+export const beginWork = (wip: FiberNode) => {
+	//  将当前 FiberNode 和 ReactElement 比较，生成子FiberNode
+
+	switch (wip.tag) {
+		case HostRoot:
+			return updateHostRoot(wip);
+		case HostComponent:
+			return updateHostComponent(wip);
+		case HostText:
+			return null;
+		default:
+			if (__DEV__) {
+				console.warn('beginWork未实现的类型');
+			}
+			break;
+	}
 };
+
+// 计算状态的最新值，并生成 子FiberNode（会和processUpdateQueue 消费状态函数联系）
+// HostRootFiber
+function updateHostRoot(wip: FiberNode) {
+	// 基础的状态
+	const baseState = wip.memoizedState;
+	// 更新的状态
+	const updateQueue = wip.updateQueue as UpdateQueue<Element>;
+	// 获取参与计算的 update
+	const pending = updateQueue.shared.pending;
+	// 获取到之后把之前的 参与计算的 update 赋值 nul
+	updateQueue.shared.pending = null;
+	// memoizedState 已经是 HostRootFiber 状态的最新值了
+	const { memoizedState } = processUpdateQueue(baseState, pending);
+	wip.memoizedState = memoizedState;
+
+	// 接下来开始创建 子 FiberNode
+	const nextChildren = wip.memoizedState;
+	reconcilerChildren(wip, nextChildren);
+	return wip.child;
+}
+
+// HostComponent： div p，它的状态更新在 commit，在这里它只需要对比新老props的差异
+// children 在 props 属性中
+function updateHostComponent(wip: FiberNode) {
+	const nextProps = wip.pendingProps;
+	const nextChildren = nextProps.children;
+
+	reconcilerChildren(wip, nextChildren);
+	return wip.child;
+}
+
+function reconcilerChildren(wip: FiberNode, children?: ReactElementType) {
+	const current = wip.alternate;
+
+	if (current !== null) {
+		// update
+		// 将子节点的 current fiberNode 和
+		// 子节点的 reactElement 对比生成子节点的wip fiberNode
+		wip.child = reconcilerChildFibers(wip, current?.child, children);
+	} else {
+		// mount
+		wip.child = mountChildFibers(wip, null, children);
+	}
+}

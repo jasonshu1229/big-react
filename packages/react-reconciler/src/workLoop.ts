@@ -43,7 +43,7 @@ export function scheduleUpdateOnFiber(fiber: FiberNode) {
 
 // 作用是用来创建fiber树，进而和更新流程联系起来
 // 那么可以推测出调用 renderRoot 应该是触发更新的 api
-function renderRoot(root: FiberNode) {
+function renderRoot(root: FiberRootNode) {
 	// 初始化
 	prepareFreshStack(root);
 
@@ -53,7 +53,10 @@ function renderRoot(root: FiberNode) {
 			workLoop();
 			break;
 		} catch (e) {
-			console.log('workLoop发生错误', e);
+			// 开发环境会被编译成 true，生产环境会被编译为 false
+			if (__DEV__) {
+				console.log('workLoop发生错误', e);
+			}
 			workInProgress = null;
 		}
 	} while (true);

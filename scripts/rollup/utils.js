@@ -4,6 +4,7 @@ import fs from 'fs';
 // 引入打包用的 plugins
 import ts from 'rollup-plugin-typescript2';
 import cjs from '@rollup/plugin-commonjs';
+import replace from '@rollup/plugin-replace';
 
 const pkgPath = path.resolve(__dirname, '../../packages'); // 开发环境下的包的路径
 const distPath = path.resolve(__dirname, '../../dist/node_modules'); // 打包之后的产物路径
@@ -37,6 +38,11 @@ export function resolvePkgPath(pkgName, isDist) {
 /**
  * 获得所有基础的打包用的plugins
  */
-export function getBaseRollupPlugins({ typescript = {} } = {}) {
-	return [cjs(), ts(typescript)];
+export function getBaseRollupPlugins({
+	alias = {
+		__DEV__: true
+	},
+	typescript = {}
+} = {}) {
+	return [replace(alias), cjs(), ts(typescript)];
 }

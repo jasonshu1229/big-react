@@ -1,5 +1,5 @@
-import { Props, Key, Ref } from 'shared/ReactTypes';
-import { WorkTag } from './workTags';
+import { Props, Key, Ref, ReactElementType } from 'shared/ReactTypes';
+import { FunctionComponent, HostComponent, WorkTag } from './workTags';
 import { Flags, NoFlags } from './fiberFlags';
 import { Container } from 'hostConfig';
 
@@ -104,6 +104,7 @@ export const createWorkInProgress = (
 	}
 	// 清除副作用，可能是上一次更新遗留下来的
 	wip.flags = NoFlags;
+	// 把 current节点对应的 fiber tree 上的工作单元复制到 wip上
 	wip.updateQueue = current.updateQueue;
 	wip.child = current.child;
 	wip.memoizedProps = current.memoizedProps;
@@ -111,3 +112,20 @@ export const createWorkInProgress = (
 
 	return wip;
 };
+
+// 根据element创建 FiberNode
+export function createFiberFromElement(element: ReactElementType): FiberNode {
+	const { type, key, props } = element;
+	let fiberTag: WorkTag = FunctionComponent;
+
+	if (typeof type === 'string') {
+		// <div>111</div> type: 'div'
+		fiberTag = HostComponent;
+	} else if (typeof type !== 'function' && __DEV__) {
+		console.warn('未定义的type类型', element);
+	}
+
+	const fiber = new FiberNode(fiberTag, props, key);
+	fiber.type = type;
+	return fiber;
+}
