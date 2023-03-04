@@ -3,6 +3,7 @@ import { beginWork } from './beginWork';
 import { createWorkInProgress, FiberNode, FiberRootNode } from './fiber';
 import { HostRoot } from './workTags';
 import { NoFlags, MutationMask } from './fiberFlags';
+import { commitMutationEffects } from './commitWork';
 
 // TODO：需要一个全局的指针，指向当时正在工作的 fiberNode 树，一般是 workInProgress
 // 指向当前工作单元的指针
@@ -70,7 +71,7 @@ function renderRoot(root: FiberRootNode) {
 	// 根据 wip fiberNode树和树中的flags执行具体的Dom操作了。
 	// 接下来实行 react-dom下的首屏渲染流程了
 	// 从根节点开始，递归执行 commitWork
-	cmmmitRoot(root);
+	commitRoot(root);
 }
 
 function commitRoot(root: FiberRootNode) {
@@ -97,6 +98,8 @@ function commitRoot(root: FiberRootNode) {
 	if (subtreeHasEffect || rootHasEffect) {
 		// beforeMutation
 		// 主要实现 mutation Placement
+		commitMutationEffects(finishedWork);
+
 		// 双缓冲树的更新
 		root.current = finishedWork;
 

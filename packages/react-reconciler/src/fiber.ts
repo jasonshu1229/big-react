@@ -72,10 +72,10 @@ export class FiberRootNode {
 	current: FiberNode; // 指向当前渲染的Fiber树的根节点，也就是 hostRootFiber
 	finishedWork: FiberNode | null; // 指向完成更新后的新的Fiber树的根节点
 	constructor(container: Container, hostRootFiber: FiberNode) {
-		this.container = container;
-		this.current = hostRootFiber;
-		hostRootFiber.stateNode = this;
-		this.finishedWork = null;
+		this.container = container; // 保存宿主环境挂载的节点(DomELement或者原生组件)
+		this.current = hostRootFiber; // 指向当前渲染的Fiber树的根节点，也就是 hostRootFiber
+		hostRootFiber.stateNode = this; // 把当前 FiberRootNode 实例挂载到 hostRootFiber.stateNode 上
+		this.finishedWork = null; // 指向完成更新后的新的Fiber树的根节点
 	}
 }
 
