@@ -66,11 +66,18 @@ const commitPlacement = (finishedWork: FiberNode) => {
 	// parentFiber Dom节点
 	const hostParent = getHostParent(finishedWork);
 	// 1. finishedWork Dom节点  2. appendChild
-	appendPlacementNodeInToContainer(finishedWork, hostParent);
+	if (hostParent !== null) {
+		appendPlacementNodeInToContainer(finishedWork, hostParent);
+	}
 };
 
 // 该函数用于获取宿主环境里当前节点的父节点
-function getHostParent(fiber: FiberNode): Container {
+/**
+ * 向上找到 fiber 最近的包含实际宿主环境节点 fiber 的宿主节点
+ * @param fiber
+ * @returns
+ */
+function getHostParent(fiber: FiberNode): Container | null {
 	let parent = fiber.return;
 
 	while (parent) {
@@ -88,6 +95,7 @@ function getHostParent(fiber: FiberNode): Container {
 	if (__DEV__) {
 		console.warn('未找到host parent');
 	}
+	return null;
 }
 
 // 该函数用于将当前节点(fiber类型的)插入到宿主环境里的父节点中
@@ -98,7 +106,7 @@ function appendPlacementNodeInToContainer(
 	// fiber 需要找到对应的dom节点，然而这个fiber节点可能是一个组件，所以需要调用createInstance方法来创建一个真实的dom节点
 	if (finishedWork.tag === HostComponent || finishedWork.tag === HostText) {
 		// 插入真实的dom节点
-		appendChildToContainer(finishedWork.stateNode, hostParent);
+		appendChildToContainer(hostParent, finishedWork.stateNode);
 		return;
 	}
 	// 递归向下的过程，直到我们找到一个真实的dom节点（HostComponent 或 HostText）

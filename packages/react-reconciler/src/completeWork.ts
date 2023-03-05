@@ -1,9 +1,10 @@
 import { NoFlags } from './fiberFlags';
 import {
+	Container,
 	appendInitialChild,
 	createInstance,
 	createTextInstance
-} from './hostConfig';
+} from 'hostConfig';
 import { HostComponent, HostText, HostRoot } from './workTags';
 import { FiberNode } from './fiber';
 
@@ -21,7 +22,8 @@ export const completeWork = (wip: FiberNode) => {
 				// mount 阶段
 				// 1.构建DOM
 				// 浏览器环境就是DOM节点，原生开发就是原生native组件
-				const instance = createInstance(wip.type, newProps);
+				// const instance = createInstance(wip.type, newProps);
+				const instance = createInstance(wip.type);
 				// 2.将DOM插入到DOM树中，这步其实也就是将刚才递归遍历的DOM树，都挂载在统一的dom上
 				// 也就是构建离谱DOM树
 				appendAllChildren(instance, wip);
@@ -38,6 +40,8 @@ export const completeWork = (wip: FiberNode) => {
 				// 1.构建DOM
 				// 浏览器环境就是DOM节点，原生开发就是原生native组件
 				const instance = createTextInstance(newProps.content); // newProps.conten： string || number
+				// 将文本属性生成的实例挂载在文本节点上
+				wip.stateNode = instance;
 				// 文本节点不存在 child
 			}
 			bubblePropertied(wip);
@@ -62,7 +66,7 @@ export const completeWork = (wip: FiberNode) => {
 	</h1>
 */
 // 往 parent 节点中插入 wip，但有可能 wip 不是单独的元素，还有可能是组件，比如上面的情况
-function appendAllChildren(parent: FiberNode, wip: FiberNode) {
+function appendAllChildren(parent: Container, wip: FiberNode) {
 	let node = wip.child;
 
 	while (node !== null) {
