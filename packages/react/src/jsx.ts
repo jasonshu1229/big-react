@@ -73,8 +73,8 @@ export const jsxDEV = (type: ElementType, config: any) => {
 	const props: Props = {};
 	let ref: Ref = null;
 
-	console.log('type', type);
-	console.log('config', config);
+	// console.log('type', type);
+	// console.log('config', config);
 
 	for (const prop in config) {
 		const val = config[prop];

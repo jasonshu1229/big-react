@@ -46,9 +46,18 @@ function ChildReconciler(shouldTrackEffects: boolean) {
 
 	// 用来标记 fiberNode 的插入、删除、移动
 	return function reconcilerChildFibers(
+		/**
+		 * returnFiber 父节点的 fiber
+		 */
 		returnFiber: FiberNode,
+		/**
+		 * currentFiber 子节点的 currentFiber
+		 */
 		currentFiber: FiberNode | null,
-		newChild?: ReactElementType // 子节点的 reactElement
+		/**
+		 * newChild 子节点的 reactElement
+		 */
+		newChild?: ReactElementType
 	) {
 		// 判断当前 fiber 的类型
 		if (typeof newChild === 'object' && newChild !== null) {

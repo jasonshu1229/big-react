@@ -1,8 +1,14 @@
 import { reconcilerChildFibers, mountChildFibers } from './childFibers';
 import { ReactElementType } from './../../shared/ReactTypes';
 import { processUpdateQueue, UpdateQueue } from './updateQueue';
-import { HostRoot, HostComponent, HostText } from './workTags';
+import {
+	HostRoot,
+	HostComponent,
+	HostText,
+	FunctionComponent
+} from './workTags';
 import { FiberNode } from './fiber';
+import { renderWithHooks } from './fiberHooks';
 
 // 递归中的递阶段
 
@@ -21,6 +27,8 @@ export const beginWork = (wip: FiberNode) => {
 			return updateHostComponent(wip);
 		case HostText:
 			return null;
+		case FunctionComponent:
+			return updateFunctionComponent(wip);
 		default:
 			if (__DEV__) {
 				console.warn('beginWork未实现的类型');
@@ -61,6 +69,11 @@ function updateHostComponent(wip: FiberNode) {
 	return wip.child;
 }
 
+/**
+ * 生成子FiberNode
+ * @param wip 当前工作的 FiberNode 节点
+ * @param children 子节点的 reactElement
+ */
 function reconcilerChildren(wip: FiberNode, children?: ReactElementType) {
 	const current = wip.alternate;
 
@@ -73,4 +86,16 @@ function reconcilerChildren(wip: FiberNode, children?: ReactElementType) {
 		// mount
 		wip.child = mountChildFibers(wip, null, children);
 	}
+}
+
+/**
+ *	计算函数组件的最新值 以及 创建子FiberNode
+ * @param wip 当前工作的 FiberNode 节点
+ */
+function updateFunctionComponent(wip: FiberNode) {
+	// 生成函数组件的子FiberNode
+	const nextChildren = renderWithHooks(wip);
+	// 根据子FiberNode 生成子FiberNode
+	reconcilerChildren(wip, nextChildren);
+	return wip.child;
 }
