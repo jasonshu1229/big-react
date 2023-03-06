@@ -36,7 +36,6 @@ export function updateContainer(
 		hostRootFiber.updateQueue as UpdateQueue<ReactElementType | null>,
 		update
 	);
-
 	// 触发函数更新，并调用scheduleUpdateOnFiber函数里的 renderRoot函数创建一个新的Fiber树
 	scheduleUpdateOnFiber(hostRootFiber);
 
