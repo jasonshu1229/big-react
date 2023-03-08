@@ -22,6 +22,13 @@ function ChildReconciler(shouldTrackEffects: boolean) {
 		return fiber;
 	}
 
+	/**
+	 * 创建一个文本节点的fiber节点，并将其链接到当前fiber树上
+	 * @param returnFiber 父节点的fiber
+	 * @param currentFiber 子节点的currentFiber
+	 * @param content 文本节点的内容
+	 * @returns 返回一个文本节点的fiber
+	 */
 	function reconcilerSingleTextNode(
 		returnFiber: FiberNode,
 		currentFiber: FiberNode | null,
