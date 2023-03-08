@@ -20,12 +20,12 @@ export default [
 		output: [
 			{
 				file: `${pkgDisPath}/index.js`,
-				name: 'index.js',
+				name: 'ReactDOM', // window.ReactDOM
 				format: 'umd' //兼容esmodule 和 commonjs
 			},
 			{
 				file: `${pkgDisPath}/client.js`,
-				name: 'client.js',
+				name: 'client',
 				format: 'umd' //兼容esmodule 和 commonjs
 			}
 		],
@@ -54,5 +54,18 @@ export default [
 				})
 			})
 		]
+	},
+	// react-test-utils
+	{
+		input: `${pkgPath}/test-utils.ts`,
+		output: [
+			{
+				file: `${pkgDisPath}/test-utils.js`,
+				name: 'testUtils',
+				format: 'umd' //兼容esmodule 和 commonjs
+			}
+		],
+		external: ['react', 'react-dom'],
+		plugins: getBaseRollupPlugins()
 	}
 ];
