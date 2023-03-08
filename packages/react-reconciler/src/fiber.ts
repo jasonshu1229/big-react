@@ -27,6 +27,7 @@ export class FiberNode {
 	alternate: FiberNode | null; // 双缓冲树的切换
 	subtreeFlags: Flags; // 子树中包含的flags
 	flags: Flags; // fiberNode 双缓冲树对比之后产生的标记，比如插入，移动，删除等
+	deletions: FiberNode[] | null;
 
 	updateQueue: unknown;
 
@@ -64,6 +65,7 @@ export class FiberNode {
 		// 副作用
 		this.flags = NoFlags; // （比如插入 更改 删除dom等）初始状态时表示没有任何标记（因为还没进行fiberNode对比）
 		this.subtreeFlags = NoFlags; // 子节点副作用标识
+		this.deletions = null; // 用于存放被删除的子节点
 	}
 }
 
@@ -107,8 +109,10 @@ export const createWorkInProgress = (
 		wip.pendingProps = pendingProps;
 		// 清除副作用，可能是上一次更新遗留下来的
 		wip.flags = NoFlags;
-		// 子树的副作用标识
+		// 重置子树的副作用标识
 		wip.subtreeFlags = NoFlags;
+		// 重置删除的子节点集合
+		wip.deletions = null;
 	}
 	// 把 current节点对应的 fiber tree 上的工作单元复制到 wip上
 	wip.type = current.type;

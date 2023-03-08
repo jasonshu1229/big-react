@@ -14,6 +14,7 @@ import { renderWithHooks } from './fiberHooks';
 
 /**
  * 作用：1.计算状态的最新值 2. 创建子 FiberNode
+ * 根据当前工作的 FiberNode 节点，生成子FiberNode
  * @param wip 当前工作的 FiberNode 节点
  * @returns 返回值是子FiberNode
  */
@@ -59,8 +60,12 @@ function updateHostRoot(wip: FiberNode) {
 	return wip.child;
 }
 
-// HostComponent： div p，它的状态更新在 commit，在这里它只需要对比新老props的差异
 // children 在 props 属性中
+/**
+ * 对比新老 props 的差异 生成子FiberNode
+ * @param wip 当前工作的 FiberNode 节点
+ * @returns 子节点的 FiberNode
+ */
 function updateHostComponent(wip: FiberNode) {
 	const nextProps = wip.pendingProps;
 	const nextChildren = nextProps.children;

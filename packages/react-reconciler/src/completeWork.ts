@@ -1,4 +1,4 @@
-import { NoFlags } from './fiberFlags';
+import { NoFlags, Update } from './fiberFlags';
 import {
 	Container,
 	appendInitialChild,
@@ -13,9 +13,25 @@ import {
 } from './workTags';
 import { FiberNode } from './fiber';
 
+/**
+ * 标记副作用
+ * @param fiber 被标记的fiber节点
+ */
+function markUpdate(fiber: FiberNode) {
+	// 标记更新
+	fiber.flags |= Update;
+}
+
+/**
+ * 递归中的归。首次渲染时构建离屏DOM树
+ * 作用：
+ * 	1。 标记节点的副作用
+ * 	2. 将子节点的副作用标记冒泡到父节点
+ * @param wip
+ * @returns
+ */
 export const completeWork = (wip: FiberNode) => {
 	// 递归中的归
-
 	const newProps = wip.pendingProps;
 	const current = wip.alternate;
 
@@ -23,6 +39,7 @@ export const completeWork = (wip: FiberNode) => {
 		case HostComponent:
 			if (current !== null && wip.stateNode) {
 				// update 阶段
+				// className a -> b
 			} else {
 				// mount 阶段
 				// 1.构建DOM
@@ -40,6 +57,12 @@ export const completeWork = (wip: FiberNode) => {
 		case HostText:
 			if (current !== null && wip.stateNode) {
 				// update 阶段
+				const oldText = current.memoizedProps.content;
+				const newText = newProps.content;
+				if (oldText !== newText) {
+					// 文本内容有变化
+					markUpdate(wip);
+				}
 			} else {
 				// mount 阶段
 				// 1.构建DOM
