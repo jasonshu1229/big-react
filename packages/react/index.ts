@@ -1,4 +1,5 @@
-import { jsxDEV } from './src/jsx';
+// isValidElement 为啥要起别名？
+import { jsxDEV, jsx, isValidElement as isValidElementFn } from './src/jsx';
 import { Dispatcher, resolveDispatcher } from './src/currentDispatcher';
 import currentDispatcher from './src/currentDispatcher';
 
@@ -19,7 +20,8 @@ export const __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED = {
 };
 
 // 定义 react 包的相关数据
-export default {
-	version: '0.0.0',
-	createElement: jsxDEV
-};
+export const version = '0.0.0';
+// TODO 根据环境区分使用jsx/jsxDEV
+// 开发 jsxDEV 生产 jsx
+export const createElement = jsx;
+export const isValidElement = isValidElementFn;
